@@ -10,6 +10,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
@@ -37,13 +38,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthorizationException authorizationException;
 
     @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
+    protected void configure(HttpSecurity http) throws Exception {
+        http
                 .csrf().disable().cors().and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest)
                 .permitAll()
-                .antMatchers("/", "/api/ping", "/api/login").permitAll()//这3个url不用访问认证
+                .antMatchers("/", "/ping").permitAll()//这3个url不用访问认证
                 .antMatchers("/admin/**").hasRole(UserTypeEnum.ADMIN.toString())
                 .antMatchers("/user/**").hasRole(UserTypeEnum.USER.toString())
                 .anyRequest()
@@ -72,23 +73,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     printWriter.close();
                 }))
                 .authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
-                    /*if (httpServletRequest.getRequestURI().equals("/hello.html")) {
-                        httpServletResponse.sendRedirect("/login.html");
-                        return;
-                    }
-                    httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    httpServletResponse.setContentType("application/json");
-                    authorizationException.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-                    authorizationException.setStatus("FAIL");
-                    authorizationException.setUri(httpServletRequest.getRequestURI());
-                    authorizationException.setMessage("UNAUTHORIZED");
-                    PrintWriter printWriter = httpServletResponse.getWriter();
-                    printWriter.write(authorizationException.toString());
-                    printWriter.flush();
-                    printWriter.close();*/
                 });
-        httpSecurity.userDetailsService(userDetailsService());
-        httpSecurity.userDetailsService(userDetailsService);
+        http.userDetailsService(userDetailsService());
+        http.userDetailsService(userDetailsService);
     }
 
     @Bean

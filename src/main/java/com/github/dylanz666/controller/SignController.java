@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 public class SignController {
-    @GetMapping("/api/ping")
+    @GetMapping("/ping")
     public String ping() {
         return "Success!";
     }
 
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     public SignInResponse login(@RequestBody User user) {
         SignInResponse signInResponse = new SignInResponse();
         signInResponse.setUsername(user.getUsername());
