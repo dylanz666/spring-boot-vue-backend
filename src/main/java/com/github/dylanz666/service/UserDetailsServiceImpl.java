@@ -52,8 +52,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         //判断用户是否存在
         User user;
         if (CollectionUtils.isEmpty(mappedUsers)) {
-            logger.info(String.format("The user %s is not found !", username));
-            throw new UsernameNotFoundException(String.format("The user %s is not found !", username));
+            logger.info(String.format("The user is not found: %S", username));
+            throw new UsernameNotFoundException(String.format("The user is not found: %s", username));
         }
         user = mappedUsers.get(0);
         return new UserDetailsImpl(user);
