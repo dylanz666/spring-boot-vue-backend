@@ -18,7 +18,7 @@ public class CorsInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String logPattern = "[%s] [%s]: %s";
+        String logPattern = "[%s][%s]:%s";
         logger.info(String.format(logPattern, request.getMethod(), request.getRemoteAddr(), request.getRequestURI()));
         return true;
     }
