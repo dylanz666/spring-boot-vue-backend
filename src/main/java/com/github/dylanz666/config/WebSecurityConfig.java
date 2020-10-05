@@ -66,7 +66,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     SignInResponse signInResponse = new SignInResponse();
                     signInResponse.setCode(400);
                     signInResponse.setStatus("fail");
-                    signInResponse.setMessage("fail");
+                    signInResponse.setMessage("Invalid username or password.");
                     signInResponse.setUsername(request.getParameter("username"));
 
                     PrintWriter out = response.getWriter();
