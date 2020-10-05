@@ -1,18 +1,24 @@
 package com.github.dylanz666.config;
 
-import com.github.dylanz666.constant.UserTypeEnum;
+import com.alibaba.fastjson.JSONArray;
+import com.github.dylanz666.constant.UserRoleEnum;
 import com.github.dylanz666.domain.AuthorizationException;
+import com.github.dylanz666.domain.SignInResponse;
 import com.github.dylanz666.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,6 +29,7 @@ import org.springframework.web.cors.CorsUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.Collection;
 
 /**
  * @author : dylanz
@@ -40,20 +47,57 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable().cors().and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest)
                 .permitAll()
-                .antMatchers("/", "/ping").permitAll()//这3个url不用访问认证
-                .antMatchers("/admin/**").hasRole(UserTypeEnum.ADMIN.toString())
-                .antMatchers("/user/**").hasRole(UserTypeEnum.USER.toString())
+                .antMatchers("/", "/ping", "/api/login").permitAll()//这3个url不用访问认证
+                .antMatchers("/admin/**").hasRole(UserRoleEnum.ADMIN.toString())
+                .antMatchers("/user/**").hasRole(UserRoleEnum.USER.toString())
                 .anyRequest()
                 .authenticated()//其他url都需要访问认证
                 .and()
                 .formLogin()
-                .loginPage("/login")//登录页面的url
-                .loginProcessingUrl("/login")//登录表使用的API
-                .permitAll()//login.html和login不需要访问认证
+                .loginProcessingUrl("/login")
+                .permitAll()
+                .failureHandler((request, response, ex) -> {//登录失败
+                    response.setContentType("application/json");
+                    response.setStatus(400);
+
+                    SignInResponse signInResponse = new SignInResponse();
+                    signInResponse.setCode(400);
+                    signInResponse.setStatus("fail");
+                    signInResponse.setMessage("fail");
+                    signInResponse.setUsername(request.getParameter("username"));
+
+                    PrintWriter out = response.getWriter();
+                    out.write(signInResponse.toString());
+                    out.flush();
+                    out.close();
+                })
+                .successHandler((request, response, authentication) -> {//登录成功
+                    response.setContentType("application/json");
+                    response.setStatus(200);
+
+                    SignInResponse signInResponse = new SignInResponse();
+                    signInResponse.setCode(200);
+                    signInResponse.setStatus("success");
+                    signInResponse.setMessage("success");
+                    signInResponse.setUsername(request.getParameter("username"));
+                    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+                    JSONArray userRoles = new JSONArray();
+                    for (GrantedAuthority authority : authorities) {
+                        String userRole = authority.getAuthority();
+                        if (!userRole.equals("")) {
+                            userRoles.add(userRole);
+                        }
+                    }
+                    signInResponse.setUserRoles(userRoles);
+
+                    PrintWriter out = response.getWriter();
+                    out.write(signInResponse.toString());
+                    out.flush();
+                    out.close();
+                })
                 .and()
                 .logout()
                 .permitAll()//logout不需要访问认证
@@ -74,8 +118,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 }))
                 .authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
                 });
-        http.userDetailsService(userDetailsService());
-        http.userDetailsService(userDetailsService);
+        try {
+            http.userDetailsService(userDetailsService());
+        } catch (Exception e) {
+            http.authenticationProvider(authenticationProvider());
+        }
+        //开启跨域访问
+        http.cors().disable();
+        //开启模拟请求，比如API POST测试工具的测试，不开启时，API POST为报403错误
+        http.csrf().disable();
+    }
+
+    @Override
+    public void configure(WebSecurity web) {
+        //对于在header里面增加token等类似情况，放行所有OPTIONS请求。
+        web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }
 
     @Bean
@@ -85,17 +142,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         UserDetails dylanz =
                 User.withUsername("dylanz")
                         .password(bCryptPasswordEncoder.encode("666"))
-                        .roles(UserTypeEnum.ADMIN.toString())
+                        .roles(UserRoleEnum.ADMIN.toString())
                         .build();
         UserDetails ritay =
                 User.withUsername("ritay")
                         .password(bCryptPasswordEncoder.encode("888"))
-                        .roles(UserTypeEnum.USER.toString())
+                        .roles(UserRoleEnum.USER.toString())
                         .build();
         UserDetails jonathanw =
                 User.withUsername("jonathanw")
                         .password(bCryptPasswordEncoder.encode("999"))
-                        .roles(UserTypeEnum.USER.toString())
+                        .roles(UserRoleEnum.USER.toString())
                         .build();
         return new InMemoryUserDetailsManager(dylanz, ritay, jonathanw);
     }
@@ -108,7 +165,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        roleHierarchy.setHierarchy("ROLE_" + UserTypeEnum.ADMIN.toString() + " > ROLE_" + UserTypeEnum.USER.toString());
+        roleHierarchy.setHierarchy("ROLE_" + UserRoleEnum.ADMIN.toString() + " > ROLE_" + UserRoleEnum.USER.toString());
         return roleHierarchy;
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        return daoAuthenticationProvider;
     }
 }

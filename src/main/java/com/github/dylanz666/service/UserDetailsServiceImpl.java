@@ -1,6 +1,6 @@
 package com.github.dylanz666.service;
 
-import com.github.dylanz666.constant.UserTypeEnum;
+import com.github.dylanz666.constant.UserRoleEnum;
 import com.github.dylanz666.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +39,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User firstUser = new User();
         firstUser.setUsername("cherrys");
         firstUser.setPassword(passwordEncoder.encode("123"));
-        firstUser.setUserType(UserTypeEnum.USER.toString());
+        firstUser.setUserType("ROLE_" + UserRoleEnum.USER.toString());
         userList.add(firstUser);
         User secondUser = new User();
         secondUser.setUsername("randyh");
         secondUser.setPassword(passwordEncoder.encode("456"));
-        secondUser.setUserType(UserTypeEnum.USER.toString());
+        secondUser.setUserType("ROLE_" + UserRoleEnum.USER.toString());
         userList.add(secondUser);
 
         List<User> mappedUsers = userList.stream().filter(s -> s.getUsername().equals(username)).collect(Collectors.toList());
@@ -52,7 +52,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         //判断用户是否存在
         User user;
         if (CollectionUtils.isEmpty(mappedUsers)) {
-            logger.info(String.format("The user is not found: %S", username));
+            logger.info(String.format("The user is not found: %s", username));
             throw new UsernameNotFoundException(String.format("The user is not found: %s", username));
         }
         user = mappedUsers.get(0);
