@@ -1,6 +1,5 @@
 package com.github.dylanz666.service;
 
-import com.github.dylanz666.constant.UserTypeEnum;
 import com.github.dylanz666.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

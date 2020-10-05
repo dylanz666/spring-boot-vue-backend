@@ -1,9 +1,7 @@
 package com.github.dylanz666.controller;
 
-import com.github.dylanz666.constant.UserTypeEnum;
 import com.github.dylanz666.domain.SignInResponse;
 import com.github.dylanz666.domain.User;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
  * @since : 10/04/2020
  */
 @RestController
-@CrossOrigin
 public class SignController {
     @GetMapping("/api/ping")
     public String ping() {
