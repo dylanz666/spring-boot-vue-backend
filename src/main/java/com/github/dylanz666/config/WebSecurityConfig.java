@@ -50,7 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest)
                 .permitAll()
-                .antMatchers("/", "/ping", "/api/login").permitAll()//这3个url不用访问认证
+                .antMatchers("/", "/ping").permitAll()//这3个url不用访问认证
                 .antMatchers("/admin/**").hasRole(UserRoleEnum.ADMIN.toString())
                 .antMatchers("/user/**").hasRole(UserRoleEnum.USER.toString())
                 .anyRequest()

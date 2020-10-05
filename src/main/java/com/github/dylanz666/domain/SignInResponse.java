@@ -28,7 +28,7 @@ public class SignInResponse implements Serializable {
     @Override
     public String toString() {
         return "{" +
-                "\"code\":\"" + code + "\"," +
+                "\"code\":" + code + "," +
                 "\"status\":\"" + status + "\"," +
                 "\"message\":\"" + message + "\"," +
                 "\"username\":\"" + username + "\"," +
