@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
  * @since : 10/04/2020
  */
 @RestController
-public class SignController {
+public class PingController {
     @GetMapping("/ping")
     public String ping() {
         return "Success!";
