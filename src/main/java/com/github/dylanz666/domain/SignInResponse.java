@@ -1,5 +1,6 @@
 package com.github.dylanz666.domain;
 
+import com.alibaba.fastjson.JSONArray;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,9 +19,20 @@ import java.io.Serializable;
 public class SignInResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String username;
-    private String userType;
-    private String message;
-    private String status;
     private int code;
+    private String status;
+    private String message;
+    private String username;
+    private JSONArray userRoles;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"code\":" + code + "," +
+                "\"status\":\"" + status + "\"," +
+                "\"message\":\"" + message + "\"," +
+                "\"username\":\"" + username + "\"," +
+                "\"userRoles\":" + userRoles + "" +
+                "}";
+    }
 }

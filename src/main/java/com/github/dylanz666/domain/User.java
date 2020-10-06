@@ -1,5 +1,6 @@
 package com.github.dylanz666.domain;
 
+import com.alibaba.fastjson.JSONArray;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +21,5 @@ public class User implements Serializable {
 
     private String username;
     private String password;
-    private String userType;
+    private JSONArray userRoles;
 }

@@ -2,9 +2,7 @@ package com.github.dylanz666.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +18,8 @@ public class CorsInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        logger.info("[ " + request.getMethod() + " ]: " + request.getRequestURI() + " " + request.getRemoteAddr());
+        String logPattern = "[%s][%s]:%s";
+        logger.info(String.format(logPattern, request.getMethod(), request.getRemoteAddr(), request.getRequestURI()));
         return true;
     }
 }
