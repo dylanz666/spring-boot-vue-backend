@@ -117,6 +117,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     printWriter.close();
                 }))
                 .authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
+                    e.printStackTrace();
+                    httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    httpServletResponse.setContentType("application/json");
+                    authorizationException.setCode(HttpServletResponse.SC_UNAUTHORIZED);
+                    authorizationException.setStatus("FAIL");
+                    authorizationException.setMessage("UNAUTHORIZED");
+                    authorizationException.setUri(httpServletRequest.getRequestURI());
+                    PrintWriter printWriter = httpServletResponse.getWriter();
+                    printWriter.write(authorizationException.toString());
+                    printWriter.flush();
+                    printWriter.close();
                 });
         try {
             http.userDetailsService(userDetailsService());
