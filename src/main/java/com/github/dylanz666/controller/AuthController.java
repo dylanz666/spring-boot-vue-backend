@@ -2,6 +2,7 @@ package com.github.dylanz666.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.github.dylanz666.domain.SignInResponse;
+import com.github.dylanz666.domain.SignOutResponse;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,5 +38,14 @@ public class AuthController {
         signInResponse.setUserRoles(userRoles);
 
         return signInResponse;
+    }
+
+    @GetMapping("/api/logout")
+    public SignOutResponse signOut() {
+        SignOutResponse signOutResponse = new SignOutResponse();
+        signOutResponse.setCode(200);
+        signOutResponse.setStatus("success");
+        signOutResponse.setMessage("success");
+        return signOutResponse;
     }
 }

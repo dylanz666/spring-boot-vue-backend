@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest)
                 .permitAll()
-                .antMatchers("/", "/ping").permitAll()//这3个url不用访问认证
+                .antMatchers("/", "/ping").permitAll()//这些url不用访问认证
                 .antMatchers("/admin/**").hasRole(UserRoleEnum.ADMIN.toString())
                 .antMatchers("/user/**").hasRole(UserRoleEnum.USER.toString())
                 .anyRequest()
@@ -61,7 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .failureHandler((request, response, ex) -> {//登录失败
                     response.setContentType("application/json");
-                    response.setStatus(400);
+                    response.setStatus(200);
 
                     SignInResponse signInResponse = new SignInResponse();
                     signInResponse.setCode(400);
@@ -100,7 +101,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 })
                 .and()
                 .logout()
-                .permitAll()//logout不需要访问认证
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/api/logout")
+                .deleteCookies("JSESSIONID")
+                .permitAll()
                 .and()
                 .exceptionHandling()
                 .accessDeniedHandler(((httpServletRequest, httpServletResponse, e) -> {
