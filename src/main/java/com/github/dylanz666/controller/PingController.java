@@ -1,5 +1,6 @@
 package com.github.dylanz666.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -10,6 +11,6 @@ import org.springframework.web.bind.annotation.*;
 public class PingController {
     @GetMapping("/ping")
     public String ping() {
-        return "Success!";
+        return "success";
     }
 }
