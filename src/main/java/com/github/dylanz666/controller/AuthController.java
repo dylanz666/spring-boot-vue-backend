@@ -39,13 +39,4 @@ public class AuthController {
 
         return signInResponse;
     }
-
-    @GetMapping("/api/logout")
-    public SignOutResponse signOut() {
-        SignOutResponse signOutResponse = new SignOutResponse();
-        signOutResponse.setCode(200);
-        signOutResponse.setStatus("success");
-        signOutResponse.setMessage("success");
-        return signOutResponse;
-    }
 }

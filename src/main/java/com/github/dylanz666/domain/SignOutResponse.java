@@ -28,7 +28,7 @@ public class SignOutResponse implements Serializable {
         return "{" +
                 "\"code\":" + code + "," +
                 "\"status\":\"" + status + "\"," +
-                "\"message\":\"" + message + "" +
+                "\"message\":\"" + message + "\"" +
                 "}";
     }
 }

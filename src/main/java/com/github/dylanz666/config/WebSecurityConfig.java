@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.github.dylanz666.constant.UserRoleEnum;
 import com.github.dylanz666.domain.AuthorizationException;
 import com.github.dylanz666.domain.SignInResponse;
+import com.github.dylanz666.domain.SignOutResponse;
 import com.github.dylanz666.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -101,8 +102,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 })
                 .and()
                 .logout()
-                .logoutSuccessUrl("/api/logout")
                 .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setContentType("application/json");
+                    response.setStatus(200);
+
+                    SignOutResponse signOutResponse = new SignOutResponse();
+                    signOutResponse.setCode(200);
+                    signOutResponse.setStatus("success");
+                    signOutResponse.setMessage("success");
+
+                    PrintWriter out = response.getWriter();
+                    out.write(signOutResponse.toString());
+                    out.flush();
+                    out.close();
+                })
                 .permitAll()
                 .and()
                 .exceptionHandling()
