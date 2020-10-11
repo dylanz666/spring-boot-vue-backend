@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.github.dylanz666.constant.UserRoleEnum;
 import com.github.dylanz666.domain.AuthorizationException;
 import com.github.dylanz666.domain.SignInResponse;
+import com.github.dylanz666.domain.SignOutResponse;
 import com.github.dylanz666.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest)
                 .permitAll()
-                .antMatchers("/", "/ping").permitAll()//这3个url不用访问认证
+                .antMatchers("/", "/ping").permitAll()//这些url不用访问认证
                 .antMatchers("/admin/**").hasRole(UserRoleEnum.ADMIN.toString())
                 .antMatchers("/user/**").hasRole(UserRoleEnum.USER.toString())
                 .anyRequest()
@@ -61,7 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .failureHandler((request, response, ex) -> {//登录失败
                     response.setContentType("application/json");
-                    response.setStatus(400);
+                    response.setStatus(200);
 
                     SignInResponse signInResponse = new SignInResponse();
                     signInResponse.setCode(400);
@@ -100,7 +102,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 })
                 .and()
                 .logout()
-                .permitAll()//logout不需要访问认证
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setContentType("application/json");
+                    response.setStatus(200);
+
+                    SignOutResponse signOutResponse = new SignOutResponse();
+                    signOutResponse.setCode(200);
+                    signOutResponse.setStatus("success");
+                    signOutResponse.setMessage("success");
+
+                    PrintWriter out = response.getWriter();
+                    out.write(signOutResponse.toString());
+                    out.flush();
+                    out.close();
+                })
+                .permitAll()
                 .and()
                 .exceptionHandling()
                 .accessDeniedHandler(((httpServletRequest, httpServletResponse, e) -> {
